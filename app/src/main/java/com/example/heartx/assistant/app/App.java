@@ -6,6 +6,7 @@ import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
 //************************************
+
 public class App extends Application{
 
     @Override
