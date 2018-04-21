@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Assistant</string>
+    <string name="start_floatingBall">开启悬浮球功能</string>
+    <string name="Create">Create</string>
+    <string name="title">what content to display in this</string>
+</resources>
