@@ -3,4 +3,5 @@
     <string name="start_floatingBall">开启悬浮球功能</string>
     <string name="Create">Create</string>
     <string name="title">what content to display in this</string>
+    <string name="get_window_authority">需要取得权限以使用悬浮窗</string>
 </resources>

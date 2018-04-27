@@ -8,45 +8,56 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.heartx.assistant.toucher.MainActivity1;
 import com.orhanobut.logger.Logger;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 
 public class MainActivity_Main extends AppCompatActivity {
 
     private TextView mTextView;
     private WeakReference<Object> mWeakReference;
+    private ReferenceQueue<Object> q = new ReferenceQueue<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_main);
+        //setContentView(new CircleView(this));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Settings.canDrawOverlays(MainActivity_Main.this)) {
                 startupService();
             } else {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                Toast.makeText(MainActivity_Main.this, R.string.get_window_authority, Toast.LENGTH_LONG).show();
                 startActivity(intent);
+                finish();
             }
         } else {
             startupService();
         }
-
-        testWeakReference();
+        //testWeakReference();
     }
 
     private void startupService() {
         Intent intent = new Intent(MainActivity_Main.this, WindowService.class);
         startService(intent);
-        finish();
+        //finish();
     }
 
+    /**
+     * 弱引用测试
+     */
     private void testWeakReference(){
         mTextView = findViewById(R.id.tv);
         Object mObject = new Object();
-        mWeakReference = new WeakReference<Object>(mObject);
+        mWeakReference = new WeakReference<Object>(mObject, q);
         mTextView.setOnClickListener(new View.OnClickListener() {
             private int mInt;
             @Override

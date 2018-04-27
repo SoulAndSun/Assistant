@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.heartx.assistant">
+          package="com.example.heartx.assistant">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
 
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
+    <!--自api21起，官方出于安全考虑已不再允许第三方应用使用该权限。涉及：ActivityManager.getRunningTasks(Int)等方法-->
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:allowBackup="true"
@@ -16,27 +18,34 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".app.App">
+
         <activity android:name=".MainActivity_Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service android:name=".toucher.MainService"/>
+        <receiver android:name=".MainBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.HOME"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name=".WindowService"/>
 
-        <service
-            android:name=".floatingball.MyAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibilityservice"/>
-        </service>
+        <!--<service android:name=".toucher.MainService"/>-->
+        <!--<service-->
+        <!--android:name=".floatingball.MyAccessibilityService"-->
+        <!--android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">-->
+        <!--<intent-filter>-->
+        <!--<action android:name="android.accessibilityservice.AccessibilityService"/>-->
+        <!--</intent-filter>-->
+        <!--<meta-data-->
+        <!--android:name="android.accessibilityservice"-->
+        <!--android:resource="@xml/accessibilityservice"/>-->
+        <!--</service>-->
     </application>
 
 </manifest>

@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.heartx.assistant.util.Util;
 import com.example.heartx.assistant.util.adaptive.AdaptiveScreen;
 import com.orhanobut.logger.Logger;
 
@@ -169,7 +170,7 @@ public class WindowService extends Service {
             @Override
             public void onClick(View v) {
 
-                if (isShow() && !isCreatedCoverView) {
+                if (Util.isShow(WindowService.this) && !isCreatedCoverView) {
 
                     AdaptiveScreen.adaptive(mCoverView, mCoverViewParams);
                     addWindowView(mCoverView, mCoverViewParams);
@@ -272,45 +273,6 @@ public class WindowService extends Service {
         mWindowViews.remove(mCoverView);
         mCoverView.setVisibility(View.VISIBLE);
         isCreatedCoverView = false;
-    }
-
-    private boolean isRecentTask(){
-        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-        return "com.android.systemui".equals(rti.get(0).topActivity.getPackageName());
-    }
-
-    /**
-     * 判断当前界面是否是桌面
-     */
-    private boolean isHome() {
-        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-        return getHomes().contains(rti.get(0).topActivity.getPackageName());
-    }
-
-    /**
-     * 获得属于桌面的应用的应用包名称
-     *
-     * @return 返回包含所有包名的字符串列表
-     */
-    private List<String> getHomes() {
-        List<String> names = new ArrayList<String>();
-        PackageManager packageManager = this.getPackageManager();
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        List<ResolveInfo> resolveInfo = packageManager.queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo ri : resolveInfo) {
-            names.add(ri.activityInfo.packageName);
-        }
-        return names;
-    }
-
-    private boolean isShow(){
-        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-        return TextUtils.equals("com.jiongji.andriod.card", rti.get(0).topActivity.getPackageName());
     }
 
     @Override
