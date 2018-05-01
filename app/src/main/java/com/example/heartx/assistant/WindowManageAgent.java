@@ -62,6 +62,8 @@ class WindowManageAgent {
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
             mWindowManager.updateViewLayout(mWindowButton, mWindowButtonParams);
+
+            mWindowButton.setAlpha(0.5f);
             Log.d("TAG", "恢复监听");
         }
     };
@@ -69,8 +71,8 @@ class WindowManageAgent {
     private boolean isToast = false;
 
     WindowManageAgent(Context context) {
-        Toast.makeText(mContext, "Create WindowManageAgent", Toast.LENGTH_LONG).show();
         mContext = context;
+        Toast.makeText(mContext, "Create WindowManageAgent", Toast.LENGTH_LONG).show();
 
         mWidthPixels = context.getResources().getDisplayMetrics().widthPixels;
         mHeightPixels = context.getResources().getDisplayMetrics().heightPixels;
@@ -120,7 +122,7 @@ class WindowManageAgent {
         mWindowButton = new Button(mContext);
         mWindowButton.setText(R.string.Create);
         mWindowButton.setTextSize(7.0f);
-        mWindowButton.setAlpha(0.3f);
+        mWindowButton.setAlpha(0.5f);
 
         addWindowView(mWindowButton, mWindowButtonParams);
         addListener();
@@ -189,6 +191,7 @@ class WindowManageAgent {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
 
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                    mWindowButton.setAlpha(1f);
                     mWindowButtonParams.flags =
                             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -196,13 +199,13 @@ class WindowManageAgent {
 
                     execShellCmdKeyEvent(4);
 
-                    mHandler.sendEmptyMessageDelayed(0, 2000L);
+                    mHandler.sendEmptyMessageDelayed(0, 1000L);
 
                     return true;
                 }
 
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == 79) {
-
+                    mWindowButton.setAlpha(1f);
                     mWindowButtonParams.flags =
                             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -211,13 +214,14 @@ class WindowManageAgent {
                     mWindowButton.getLocationOnScreen(location);
                     execShellCmdTap(location);
 
-                    mHandler.sendEmptyMessageDelayed(0, 3000L);
+                    mHandler.sendEmptyMessageDelayed(0, 1000L);
 
                     return true;
                 }
 
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode != 79 && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
                     //Toast.makeText(mContext, "onKey : " + keyCode, Toast.LENGTH_SHORT).show();
+                    mWindowButton.setAlpha(1f);
                     mWindowButtonParams.flags =
                             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -225,7 +229,7 @@ class WindowManageAgent {
 
                     execShellCmdKeyEvent(keyCode);
 
-                    mHandler.sendEmptyMessageDelayed(0, 3000L);
+                    mHandler.sendEmptyMessageDelayed(0, 1000L);
                 }
 
                 return true;
