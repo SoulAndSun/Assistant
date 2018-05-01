@@ -16,6 +16,10 @@ public class WindowService extends Service {
 
     //----------------------------------------------------------------------
 
+
+
+    //+-+-+-+-
+
     private WindowManageAgent mWindowManageAgent;
 
     @Nullable
