@@ -5,22 +5,24 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.heartx.assistant.toucher.MainActivity1;
 import com.orhanobut.logger.Logger;
 
-import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 
 public class MainActivity_Main extends AppCompatActivity {
 
     private TextView mTextView;
+    private Button mButton;
+    private EditText mEditText;
+
     private WeakReference<Object> mWeakReference;
     private ReferenceQueue<Object> q = new ReferenceQueue<>();
 
@@ -42,7 +44,25 @@ public class MainActivity_Main extends AppCompatActivity {
         } else {
             startupService();
         }
-        //testWeakReference();
+        testWeakReference();
+
+//        mButton = findViewById(R.id.btn);
+//        mButton.setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                Toast.makeText(MainActivity_Main.this, "key press in Button: " + keyCode, Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        });
+//
+//        mEditText = findViewById(R.id.et);
+//        mEditText.setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                Toast.makeText(MainActivity_Main.this, "key press in EditText: " + keyCode, Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        });
     }
 
     private void startupService() {
@@ -68,8 +88,8 @@ public class MainActivity_Main extends AppCompatActivity {
                     Logger.d("The Object is null");
                     //mObject = new Object();
                 }
+                Toast.makeText(MainActivity_Main.this, "点击了TextView", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 }
