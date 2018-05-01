@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 public class WindowService extends Service {
 
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     private WindowManageAgent mWindowManageAgent;
 
     @Nullable
