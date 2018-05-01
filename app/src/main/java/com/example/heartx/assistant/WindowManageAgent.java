@@ -66,7 +66,10 @@ class WindowManageAgent {
         }
     };
 
+    private boolean isToast = false;
+
     WindowManageAgent(Context context) {
+        Toast.makeText(mContext, "Create WindowManageAgent", Toast.LENGTH_LONG).show();
         mContext = context;
 
         mWidthPixels = context.getResources().getDisplayMetrics().widthPixels;
@@ -131,7 +134,13 @@ class WindowManageAgent {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, "点击了Button", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mContext, "点击了Button", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,
+                        "WM: " + mWindowManager.toString() +
+                                "AS: " + mAccelerometerSensor.toString() +
+                                "AL: " + mAccelerometerListener.toString()
+                        , Toast.LENGTH_SHORT).show();
+                isToast = true;
             }
         });
 
@@ -207,7 +216,7 @@ class WindowManageAgent {
                     return true;
                 }
 
-                if (event.getAction() == KeyEvent.ACTION_UP && keyCode != 79 && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN){
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode != 79 && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
                     //Toast.makeText(mContext, "onKey : " + keyCode, Toast.LENGTH_SHORT).show();
                     mWindowButtonParams.flags =
                             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -253,6 +262,11 @@ class WindowManageAgent {
 
                 if (mWindowManager != null) {
                     mWindowManager.updateViewLayout(mWindowButton, mWindowButtonParams);
+                }
+
+                if (isToast) {
+                    Toast.makeText(mContext, "" + x, Toast.LENGTH_SHORT).show();
+                    isToast = false;
                 }
             }
 

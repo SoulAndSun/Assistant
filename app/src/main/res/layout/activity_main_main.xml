@@ -16,21 +16,21 @@
 
         />
 
-    <EditText
-        android:id="@+id/et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn"
-        android:hint="@string/app_name"
+    <!--<EditText-->
+        <!--android:id="@+id/et"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/btn"-->
+        <!--android:hint="@string/app_name"-->
 
-        />
+        <!--/>-->
 
-    <Button
-        android:id="@+id/btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:focusableInTouchMode="true"
+    <!--<Button-->
+        <!--android:id="@+id/btn"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:focusableInTouchMode="true"-->
 
-        />
+        <!--/>-->
 
 </RelativeLayout>

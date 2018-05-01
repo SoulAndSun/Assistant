@@ -20,8 +20,8 @@ import java.lang.ref.WeakReference;
 public class MainActivity_Main extends AppCompatActivity {
 
     private TextView mTextView;
-    private Button mButton;
-    private EditText mEditText;
+//    private Button mButton;
+//    private EditText mEditText;
 
     private WeakReference<Object> mWeakReference;
     private ReferenceQueue<Object> q = new ReferenceQueue<>();

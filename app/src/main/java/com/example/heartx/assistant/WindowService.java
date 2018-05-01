@@ -25,7 +25,7 @@ public class WindowService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        //Log.d("TAG", "Service onCreate exec");
+        //Toast.makeText(this, "onCreate", Toast.LENGTH_LONG).show();
         mWindowManageAgent = new WindowManageAgent(this);
         mWindowManageAgent.init();
 
