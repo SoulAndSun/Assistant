@@ -41,6 +41,7 @@ public class WindowService extends Service {
     public void onDestroy() {
 
         mWindowManageAgent.destroy();
+        mWindowManageAgent = null;
 
         super.onDestroy();
     }
