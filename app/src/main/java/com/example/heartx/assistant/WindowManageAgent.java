@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.heartx.assistant.util.ShellCmdUtil;
@@ -25,6 +26,11 @@ import com.example.heartx.assistant.util.adaptive.AdaptiveScreen;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by HeartX on 2018/4/27.
@@ -50,6 +56,8 @@ class WindowManageAgent {
     private MyHandle mHandler;
 
     private boolean isToast = false;
+
+    public TextView mTv, mX, mY, mZ;
 
     WindowManageAgent(Context context) {
         mContext = context;
@@ -219,10 +227,18 @@ class WindowManageAgent {
 
                 float x = event.values[0];
                 float y = event.values[1];
-                //float z = event.values[2];
+                float z = event.values[2];
+
+                if (mX != null && mY != null && mZ != null) {
+                    mX.setText("" + ((x +1) * -1));
+                    mY.setText("" + (y -7));
+                    mZ.setText("" + z);
+                }
 
                 mSensorMouseParams.x += (int) (x + 1) * -1;
                 mSensorMouseParams.y += (int) (y - 7);
+//                mSensorMouseParams.x += (int) x;
+//                mSensorMouseParams.y += (int) y * -1;
 
                 if (mSensorMouseParams.x < 0) {
                     mSensorMouseParams.x = 0;
@@ -252,12 +268,15 @@ class WindowManageAgent {
 
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+                if (mTv != null) {
+                    mTv.setText("" + accuracy);
+                }
+                Log.d("TAG", "onAccuracyChanged: ///////////////////////////////////////" + accuracy);
             }
 
         }, mAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
-
     }
+
     /**
      * {@link #changeMouseState(int, float)}.
      */
