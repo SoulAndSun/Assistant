@@ -13,6 +13,12 @@ import java.io.OutputStream;
 
 public class ShellCmdUtil {
 
+    public static final int SWIPE_TO_TOP = 1;
+    public static final int SWIPE_TO_BOTTOM = 2;
+    public static final int SWIPE_TO_RIGHT = 3;
+    public static final int SWIPE_TO_LEFT = 4;
+    public static final int SWIPE_STATUS_BAR = 5;
+
     public static void execShellCmdTap(View view) {
         int[] location = new int[2];
         view.getLocationOnScreen(location);
@@ -29,6 +35,28 @@ public class ShellCmdUtil {
 
     public static void execShellCmdKeyEvent(int keyCode) {
         execShellCmd("input keyevent " + keyCode);
+    }
+
+    public static void execShellCmdSwipe(int num) {
+
+        switch (num) {
+            case SWIPE_TO_TOP:
+                execShellCmd("input swipe 333 333 333 1111 500");
+                break;
+            case SWIPE_TO_BOTTOM:
+                execShellCmd("input swipe 333 1111 333 333 500");
+                break;
+            case SWIPE_TO_RIGHT:
+                execShellCmd("input swipe 666 666 000 666");
+                break;
+            case SWIPE_TO_LEFT:
+                execShellCmd("input swipe 000 666 666 666");
+                break;
+
+            case SWIPE_STATUS_BAR:
+                execShellCmd("input swipe 666 000 666 666");
+                break;
+        }
     }
 
     /**
@@ -53,7 +81,7 @@ public class ShellCmdUtil {
         }
     }
 
-    public static void sendEvent0_116(){
+    public static void sendEvent0_116() {
         execShellCmd("sendevent /dev/input/event0 1 116 1\n" +
                 "sendevent /dev/input/event0 0 0 0\n" +
                 "sendevent /dev/input/event0 1 116 0\n" +

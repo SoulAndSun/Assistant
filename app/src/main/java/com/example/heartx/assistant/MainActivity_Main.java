@@ -1,7 +1,10 @@
 package com.example.heartx.assistant;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
@@ -69,8 +72,8 @@ public class MainActivity_Main extends AppCompatActivity {
 
     private void startupService() {
         Intent intent = new Intent(MainActivity_Main.this, WindowService.class);
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
-        //startService(intent);
+        //bindService(intent, mConnection, BIND_AUTO_CREATE);
+        startService(intent);
         //finish();
     }
 
@@ -90,14 +93,21 @@ public class MainActivity_Main extends AppCompatActivity {
                     Logger.d("The Object is null");
                     //mObject = new Object();
                 }
-                Toast.makeText(MainActivity_Main.this, "点击了TextView", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity_Main.this, "退出应用", Toast.LENGTH_SHORT).show();
+                MainActivity_Main.super.onBackPressed();
             }
         });
     }
 
     @Override
     protected void onDestroy() {
-        unbindService(mConnection);
+        //unbindService(mConnection);
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        //moveTaskToBack(false);
     }
 }

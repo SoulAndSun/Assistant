@@ -3,6 +3,9 @@ package com.example.heartx.assistant;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
+
+import com.orhanobut.logger.Logger;
 
 /**
  * 监听开机广播
@@ -18,7 +21,6 @@ public class MainBroadcastReceiver extends BroadcastReceiver {
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)){
             startupService(context);
         }
-
     }
 
     private void startupService(Context context) {
@@ -29,7 +31,7 @@ public class MainBroadcastReceiver extends BroadcastReceiver {
 
     private void startupActivity(Context context) {
         Intent intent = new Intent(context, MainActivity_Main.class);
-        context.startService(intent);
+        context.startActivity(intent);
         //finish();
     }
 }

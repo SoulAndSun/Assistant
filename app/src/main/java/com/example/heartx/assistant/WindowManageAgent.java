@@ -2,12 +2,17 @@ package com.example.heartx.assistant;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -22,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.heartx.assistant.util.ShellCmdUtil;
 import com.example.heartx.assistant.util.adaptive.AdaptiveScreen;
+import com.orhanobut.logger.Logger;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
@@ -33,31 +39,28 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.functions.Consumer;
 
 /**
+ * 悬浮窗相关类
  * Created by HeartX on 2018/4/27.
  */
 
 class WindowManageAgent {
 
     private Context mContext;
-
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mSensorMouseParams;
-
     private Button mSensorMouse;
-
     private Set<View> mWindowViews = new HashSet<>();
+    private MyHandle mHandler;
+
     private int mWidthPixels;
     private int mHeightPixels;
-
     private SensorManager mSensorManager;
     private Sensor mAccelerometerSensor;
     private SensorEventListener mAccelerometerListener;
-
-    private MyHandle mHandler;
-
-    private boolean isToast = false;
+    private BroadcastReceiver mBroadcastReceiver;
 
     public TextView mTv, mX, mY, mZ;
+    private SoundPool soundPool;
 
     WindowManageAgent(Context context) {
         mContext = context;
@@ -116,9 +119,34 @@ class WindowManageAgent {
 
         addWindowView(mSensorMouse, mSensorMouseParams);
         addListener();
+
+        //1 最多同时放出的声音数，2声音类型，3声音质量越高越耗费资源
+        soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
+        soundPool.load(mContext, R.raw.fu, 1);//context id 级别
     }
 
     private void addListener() {
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            private int mInt;
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                    mSensorManager.registerListener(mAccelerometerListener,
+                            mAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+                    Logger.d("传感器注册成功");
+                }
+                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                    mSensorManager.unregisterListener(mAccelerometerListener);
+                    Logger.d("传感器注销成功");
+                }
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        mContext.registerReceiver(mBroadcastReceiver,intentFilter);
 
 //--------------------------------------------------------------------------------------------------
         mSensorMouse.setOnClickListener(new View.OnClickListener() {
@@ -126,13 +154,7 @@ class WindowManageAgent {
 
             @Override
             public void onClick(View v) {
-                //Toast.makeText(mContext, "点击了Button", Toast.LENGTH_SHORT).show();
-                Toast.makeText(mContext,
-                        "WM: " + mWindowManager.toString() +
-                                "AS: " + mAccelerometerSensor.toString() +
-                                "AL: " + mAccelerometerListener.toString()
-                        , Toast.LENGTH_SHORT).show();
-                isToast = true;
+                Toast.makeText(mContext, "点击了Button", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -183,35 +205,67 @@ class WindowManageAgent {
                 if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     //Toast.makeText(mContext, "onKey : " + keyCode, Toast.LENGTH_SHORT).show();
 
+                    if (mSensorMouseParams.y <= 0 && mSensorMouseParams.x <= 0) {
+                        ShellCmdUtil.execShellCmdKeyEvent(KeyEvent.KEYCODE_HOME);
+                        return true;
+                    }
+
+                    if (mSensorMouseParams.x <= 0) {
+                        ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_LEFT);
+                        return true;
+                    }
+
+                    if (mSensorMouseParams.y <= 0) {
+                        ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_TOP);
+                        return true;
+                    }
+
+                    if (mSensorMouseParams.x >= mWidthPixels) {
+                        ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_RIGHT);
+                        return true;
+                    }
+
+                    if (mSensorMouseParams.y >= mHeightPixels) {
+                        ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_BOTTOM);
+                        return true;
+                    }
+
                     changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
-                    ShellCmdUtil.execShellCmdKeyEvent(4);
+                    ShellCmdUtil.execShellCmdKeyEvent(KeyEvent.KEYCODE_BACK);
 
-                    sendMessage(0, 1000L);
+                    sendMessage(0, 2000L);
 
                     return true;
                 }
 
-                if (event.getAction() == KeyEvent.ACTION_UP && (keyCode == 79 || keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
+                if (event.getAction() == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_HEADSETHOOK
+                        || keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
                     //Toast.makeText(mContext, "onKey : " + keyCode, Toast.LENGTH_SHORT).show();
 
-                    changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    if (mSensorMouseParams.y <= 0) {
+                        ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_STATUS_BAR);
+                        return true;
+                    }
+
+                    changeMouseState(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
                     ShellCmdUtil.execShellCmdTap(mSensorMouse);
 
-                    sendMessage(0, 3000L);
+                    sendMessage(0, 2000L);
 
                     return true;
                 }
 
-                if (event.getAction() == KeyEvent.ACTION_UP && keyCode != 79 && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
+                if (event.getAction() == KeyEvent.ACTION_UP) {
                     Toast.makeText(mContext, "onKey : " + keyCode, Toast.LENGTH_SHORT).show();
 
                     changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
                     ShellCmdUtil.execShellCmdKeyEvent(keyCode);
 
-                    sendMessage(0, 1000L);
+                    sendMessage(0, 2000L);
 
                     return true;
                 }
@@ -221,24 +275,23 @@ class WindowManageAgent {
         });
 
 //--------------------------------------------------------------------------------------------------
-        mSensorManager.registerListener(mAccelerometerListener = new SensorEventListener() {
+        mSensorManager.registerListener(mAccelerometerListener  = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
 
-                float x = event.values[0];
-                float y = event.values[1];
-                float z = event.values[2];
+//                if (mX != null && mY != null && mZ != null) {
+//                    mX.setText("" + event.values[0]);
+//                    mY.setText("" + event.values[1]);
+//                    mZ.setText("" + event.values[2]);
+//                }
 
-                if (mX != null && mY != null && mZ != null) {
-                    mX.setText("" + ((x +1) * -1));
-                    mY.setText("" + (y -7));
-                    mZ.setText("" + z);
+                mSensorMouseParams.x += event.values[0] * -1;
+
+                if ((event.values[1] - 6) > 0) {
+                    mSensorMouseParams.y += (event.values[1] - 6) * 1.5;
+                } else {
+                    mSensorMouseParams.y += event.values[1] - 6;
                 }
-
-                mSensorMouseParams.x += (int) (x + 1) * -1;
-                mSensorMouseParams.y += (int) (y - 7);
-//                mSensorMouseParams.x += (int) x;
-//                mSensorMouseParams.y += (int) y * -1;
 
                 if (mSensorMouseParams.x < 0) {
                     mSensorMouseParams.x = 0;
@@ -259,22 +312,28 @@ class WindowManageAgent {
                 if (mWindowManager != null) {
                     mWindowManager.updateViewLayout(mSensorMouse, mSensorMouseParams);
                 }
-
-                if (isToast) {
-                    Toast.makeText(mContext, "" + x, Toast.LENGTH_SHORT).show();
-                    isToast = false;
-                }
             }
 
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                if (mTv != null) {
-                    mTv.setText("" + accuracy);
-                }
-                Log.d("TAG", "onAccuracyChanged: ///////////////////////////////////////" + accuracy);
+//                if (mTv != null) {
+//                    mTv.setText("" + accuracy);
+//                }
+//                Logger.d(accuracy);
+//                soundPlay();
             }
 
         }, mAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+    }
+
+    //消息提示音
+    public void soundPlay() {
+        //第1个参数 ID(放入 soundpool的顺序 第一个放入)
+        //2,3 左声道 右声道的控制量
+        //4 优先级
+        //5 是否循环     0 - 不循环    -1 -  循环
+        //6 播放比例     0.5-2 一般为1 表示正常播放
+        soundPool.play(1, 1, 1, 1, 0, 1);
     }
 
     /**
@@ -329,6 +388,7 @@ class WindowManageAgent {
             mAccelerometerSensor = null;
             mAccelerometerListener = null;
         }
+        mContext.unregisterReceiver(mBroadcastReceiver);
         mContext = null;
 
         mHandler = null;
