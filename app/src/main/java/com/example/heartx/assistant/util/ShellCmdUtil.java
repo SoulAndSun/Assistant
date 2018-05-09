@@ -1,7 +1,9 @@
 package com.example.heartx.assistant.util;
 
 import android.view.View;
-import android.widget.Toast;
+
+import com.example.heartx.assistant.ToucherService;
+import com.orhanobut.logger.Logger;
 
 import java.io.DataOutputStream;
 import java.io.OutputStream;
@@ -18,6 +20,10 @@ public class ShellCmdUtil {
     public static final int SWIPE_TO_RIGHT = 3;
     public static final int SWIPE_TO_LEFT = 4;
     public static final int SWIPE_STATUS_BAR = 5;
+    public static final int LONG_CLICK = 6;
+
+    private static int delay = 500;
+    private static int offset = 200;
 
     public static void execShellCmdTap(View view) {
         int[] location = new int[2];
@@ -26,10 +32,11 @@ public class ShellCmdUtil {
     }
 
     public static void execShellCmdTap(int[] location) {
-        execShellCmd("input tap " + (location[0] + 50) + " " + (location[1] + 50));// TODO: 2018/5/3 把50改成动态获取
+        execShellCmd("input tap " + location[0] + " " + location[1]);
     }
 
     public static void execShellCmdTap(int x, int y) {
+        Logger.d(x +"------------------"+ y);
         execShellCmd("input tap " + x + " " + y);
     }
 
@@ -47,14 +54,50 @@ public class ShellCmdUtil {
                 execShellCmd("input swipe 333 1111 333 333 500");
                 break;
             case SWIPE_TO_RIGHT:
-                execShellCmd("input swipe 666 666 000 666");
+                execShellCmd("input swipe 666 666 000 666 500");
                 break;
             case SWIPE_TO_LEFT:
-                execShellCmd("input swipe 000 666 666 666");
+                execShellCmd("input swipe 000 666 666 666 500");
                 break;
 
             case SWIPE_STATUS_BAR:
-                execShellCmd("input swipe 666 000 666 666");
+                execShellCmd("input swipe 666 000 666 666 500");
+                break;
+
+            case LONG_CLICK:
+                //execShellCmd();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public static void execShellCmdSwipe(int num, int x, int y) {
+
+        switch (num) {
+            case SWIPE_TO_TOP:
+                execShellCmd("input swipe " + x + " " + (y + offset) + " " + x + " " + ToucherService.screenH + " " + delay);
+                break;
+            case SWIPE_TO_BOTTOM:
+                execShellCmd("input swipe " + x + " " + (y - offset) + " " + x + " 000 " + delay);
+                break;
+            case SWIPE_TO_RIGHT:
+                execShellCmd("input swipe " + (x - offset) + " " + y + " 000 " + y + " " + delay);
+                break;
+            case SWIPE_TO_LEFT:
+                execShellCmd("input swipe " + (x + offset) + " " + y + " " + ToucherService.screenW + " " + y + " " + delay);
+                break;
+
+            case SWIPE_STATUS_BAR:
+                execShellCmd("input swipe " + x + " " + y + " " + x + " " + ToucherService.screenH + " " + delay);
+                break;
+
+            case LONG_CLICK:
+                execShellCmd("input swipe " + x + " " + y + " " + (x + 1) + " " + (y + 1) + " " + 1000);
+                break;
+
+            default:
                 break;
         }
     }

@@ -248,14 +248,6 @@ public class AdaptiveScreen {
 
                     mParams.setMargins(leftMargin, topMargin, rightMargin, bottomMargin);
                 }
-                if (lParams instanceof WindowManager.LayoutParams) {
-                    Logger.d("lParams is WindowManager.LayoutParams instance");
-
-                    WindowManager.LayoutParams wParams = (WindowManager.LayoutParams) lParams;
-
-                    wParams.x = (int) (wParams.x * widthScale);
-                    wParams.y = (int) (wParams.y * heightScale);
-                }
                 child.setLayoutParams(lParams);
             }
         }

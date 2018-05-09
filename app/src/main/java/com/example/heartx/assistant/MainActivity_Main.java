@@ -1,10 +1,7 @@
 package com.example.heartx.assistant;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
@@ -20,8 +17,6 @@ import com.orhanobut.logger.Logger;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 
-import io.reactivex.functions.Consumer;
-
 public class MainActivity_Main extends AppCompatActivity {
 
     public TextView mTextView;
@@ -29,13 +24,12 @@ public class MainActivity_Main extends AppCompatActivity {
 
     private WeakReference<Object> mWeakReference;
     private ReferenceQueue<Object> q = new ReferenceQueue<>();
-    private WindowService mService;
+    private ToucherService mService;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = ((WindowService.MyBinder) service).getService();
-            mService.bindView(mTextView, x, y, z);
+            mService = ((ToucherService.MyBinder) service).getService();
         }
 
         @Override
@@ -71,7 +65,7 @@ public class MainActivity_Main extends AppCompatActivity {
     }
 
     private void startupService() {
-        Intent intent = new Intent(MainActivity_Main.this, WindowService.class);
+        Intent intent = new Intent(MainActivity_Main.this, ToucherService.class);
         //bindService(intent, mConnection, BIND_AUTO_CREATE);
         startService(intent);
         //finish();

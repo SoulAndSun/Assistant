@@ -33,7 +33,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".WindowService"/>
+        <service android:name=".ToucherService"/>
 
         <!--<service android:name=".toucher.MainService"/>-->
         <!--<service-->

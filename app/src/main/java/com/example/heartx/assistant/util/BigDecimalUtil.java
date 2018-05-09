@@ -1,4 +1,4 @@
-package com.example.heartx.assistant.util.adaptive;
+package com.example.heartx.assistant.util;
 
 import java.math.BigDecimal;
 
