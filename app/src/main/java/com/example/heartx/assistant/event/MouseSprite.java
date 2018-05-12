@@ -3,14 +3,20 @@ package com.example.heartx.assistant.event;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -38,11 +44,8 @@ public class MouseSprite {
     private MyHandle mHandler;
 
     public int offsetX;
-    public  int offsetY;
+    public int offsetY;
 
-    public static final int OFFSET_TO_LEFT = 0;
-    public static final int OFFSET_TO_RIGHT = 1;
-    
     private SoundPool soundPool;
 
     public MouseSprite(Context context) {
@@ -54,50 +57,96 @@ public class MouseSprite {
         }
 
         if (context instanceof Service) {
-            mWindowManager = (WindowManager) ((Service) context).getApplication().getSystemService(Context.WINDOW_SERVICE);
+            mWindowManager = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         }
 
-        CreateMouse();
+        generateMouse();
 
         offsetX = mSensorMouseParams.width / 2;
         offsetY = mSensorMouseParams.height / 2;
 
     }
 
-    private void CreateMouse() {
-        mSensorMouseParams = new WindowManager.LayoutParams();
+    public void generateMouse() {
+
+        if (mSensorMouseParams == null) {
+            mSensorMouseParams = generateParam(100, 100);
+        }
+
+        if (mSensorMouse == null) {
+            mSensorMouse = new Button(mContext);
+            mSensorMouse.setAlpha(0.5f);
+        }
+
+        if (!mWindowViews.contains(mSensorMouse)) {
+            addWindowView(mSensorMouse, mSensorMouseParams);
+        }
+    }
+
+    /**
+     * 限制触屏和获取焦点
+     * @param type
+     * @return
+     */
+    public WindowManager.LayoutParams generateParam(int type) {
+
+        return generateParam(
+                type,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.RGBA_8888);
+    }
+
+    /**
+     * 唯一限制：不能触屏
+     * @param width
+     * @param height
+     * @return
+     */
+    public WindowManager.LayoutParams generateParam(int width, int height) {
+
+        return generateParam(width, height, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+
+    public WindowManager.LayoutParams generateParam(int width, int height, int flags) {
+
+        return generateParam(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR, width, height, flags, PixelFormat.RGBA_8888);
+    }
+
+    public WindowManager.LayoutParams generateParam(int type, int width, int height, int flags, int format) {
+
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
         //系统报错提示窗口
-        mSensorMouseParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
-        //设置效果为背景透明.
-        mSensorMouseParams.format = PixelFormat.RGBA_8888;
+        //params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        //params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        params.type = type;
+
+        // 设置背景透明度
+        //params.format = PixelFormat.TRANSPARENT;
+        //params.format = PixelFormat.RGBA_8888;
+        params.format = format;
         //WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;//允许窗口在所有装饰之上
         //WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;// 不拦截窗口之外的触摸事件。默认是拦截的
         //WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;//不获取焦点，会使按键监听失效，同时启动FLAG_NOT_TOUCH_MODAL
+        //WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;//具有焦点能力并且不会影响输入法的使用
         //WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;//额外接收窗口外触摸事件MotionEvent.ACTION_OUTSIDE
         //WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;//不接收触摸事件
-        mSensorMouseParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |//允许窗口在所有装饰之上
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;//不接收触摸事件
+        params.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | flags;
 
         //设置窗口初始停靠位置.
-        mSensorMouseParams.gravity = Gravity.START | Gravity.TOP;
-
-        mSensorMouseParams.x = 1080;
-        mSensorMouseParams.y = 700;
+        params.gravity = Gravity.START | Gravity.TOP;
 
         //设置悬浮窗口长宽数据.
         //注意，这里的width和height均使用px而非dp.这里我偷了个懒
         //如果你想完全对应布局设置，需要先获取到机器的dpi
         //px与dp的换算为px = dp * (dpi / 160).
-        mSensorMouseParams.width = 150;
-        mSensorMouseParams.height = 150;
+        params.width = width;
+        params.height = height;
 
-        mSensorMouse = new Button(mContext);
-        mSensorMouse.setText(R.string.Create);
-        mSensorMouse.setTextSize(7.0f);
-        mSensorMouse.setAlpha(0.5f);
-
-        addWindowView(mSensorMouse, mSensorMouseParams);
+        return params;
     }
 
     //提示音
@@ -126,6 +175,7 @@ public class MouseSprite {
 
     /**
      * 转换鼠标监听状态
+     *
      * @param flag
      */
     void changeMouseState(int flag, float alpha) {
@@ -134,23 +184,26 @@ public class MouseSprite {
         mWindowManager.updateViewLayout(mSensorMouse, mSensorMouseParams);
     }
 
-    void sendMessage(int what, long delay){
+    void sendMessage(int what, long delay) {
         if (mHandler.isHandled) {
             mHandler.isHandled = false;
             mHandler.sendEmptyMessageDelayed(what, delay);
         }
     }
 
-    private void addWindowView(View view, WindowManager.LayoutParams params) {
-        AdaptiveScreen.adaptive(view, params);
-        mWindowManager.addView(view, params);
-        mWindowViews.add(view);
+    public void addWindowView(View view, WindowManager.LayoutParams params) {
+        if (mWindowManager != null && !mWindowViews.contains(view)) {
+            AdaptiveScreen.adaptive(view, params);
+            mWindowManager.addView(view, params);
+            mWindowViews.add(view);
+        }
     }
 
-    private void removeWindowView(View view) {
-        mWindowManager.removeView(view);
-        mWindowViews.remove(view);
-
+    public void removeWindowView(View view) {
+        if (mWindowManager != null && mWindowViews.contains(view)) {
+            mWindowManager.removeView(view);
+            mWindowViews.remove(view);
+        }
     }
 
     public WindowManager getWindowManager() {
@@ -161,12 +214,20 @@ public class MouseSprite {
         return mSensorMouseParams;
     }
 
+    public Context getContext() {
+        return mContext;
+    }
+
     public Button getMouse() {
         return mSensorMouse;
     }
 
+    public Set<View> getWindowViews() {
+        return mWindowViews;
+    }
+
     public int getX() {
-        if (mSensorMouseParams.x >= ToucherService.screenW ) {
+        if (mSensorMouseParams.x >= ToucherService.screenWidth) {
             return mSensorMouseParams.x - offsetX;
         }
         return mSensorMouseParams.x + offsetX;
@@ -174,7 +235,7 @@ public class MouseSprite {
 
     public int getY() {
 
-        if (mSensorMouseParams.y >= ToucherService.screenH) {
+        if (mSensorMouseParams.y >= ToucherService.screenHeight) {
             return mSensorMouseParams.y - offsetY;
         }
 
@@ -185,6 +246,7 @@ public class MouseSprite {
 
         return mSensorMouseParams.x;
     }
+
     public int getRawY() {
 
         return mSensorMouseParams.y;
@@ -198,12 +260,12 @@ public class MouseSprite {
 
         if (mWindowManager != null) {
             for (View v : mWindowViews) {
-                mWindowManager.removeView(v);
+                removeWindowView(v);
             }
             mWindowManager = null;
             mWindowViews = null;
         }
-        
+
         mContext = null;
 
         mHandler = null;
@@ -228,10 +290,39 @@ public class MouseSprite {
             MouseSprite mouseSprite = mWeakReference.get();
 
             if (mouseSprite != null) {
-                mouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, 0.5f);
+                mouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, 0.5f);
                 isHandled = true;
                 Log.d("TAG", "恢复监听");
             }
+        }
+    }
+
+    public static class Mouse extends View {
+
+        private Paint mPaint;
+
+        public Mouse(Context context) {
+            this(context, null);
+        }
+
+        public Mouse(Context context, @Nullable AttributeSet attrs) {
+            this(context, attrs, 0);
+        }
+
+        public Mouse(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+            mPaint = new Paint();
+            mPaint.setColor(Color.BLUE);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            canvas.drawColor(Color.parseColor("#70b9b7b5"));
+
+            canvas.drawCircle(200, 200, 50, mPaint);
         }
     }
 }

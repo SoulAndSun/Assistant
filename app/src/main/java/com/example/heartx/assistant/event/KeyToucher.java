@@ -1,5 +1,6 @@
 package com.example.heartx.assistant.event;
 
+import android.hardware.SensorEvent;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,7 +23,12 @@ class KeyToucher extends Toucher {
 
     KeyToucher(MouseSprite mouseSprite) {
         super(mouseSprite);
-        mMouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, 0.5f);
+    }
+
+    @Override
+    public void changeMouseState(MouseSprite mouseSprite) {
+        mouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM, 0.5f);
     }
 
     @Override
@@ -30,35 +36,16 @@ class KeyToucher extends Toucher {
 
         int action = event.getAction();
         //任意键长按检测
-        if (checkKeyLongPress(action)) {
-            return true;
-        }
+        if (checkKeyLongPress(action)) return true;
 
         //声量键“-”弹起检测
-        if (checkVolumeDownKey(action, keyCode)) {
-            return true;
-        }
+        if (checkVolumeDownKey(action, keyCode)) return true;
 
         //声量键“+”弹起检测
-        if (checkVolumeUpKey(action, keyCode)) {
-            return true;
-        }
-
+        if (checkVolumeUpKey(action, keyCode)) return true;
 
         //声量键以外的键弹起时，直接模拟该键
-        if (action == KeyEvent.ACTION_UP) {
-            mMouseSprite.toast("onKey : " + keyCode);
-
-            mMouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-
-            ShellCmdUtil.execShellCmdKeyEvent(keyCode);
-
-            mMouseSprite.sendMessage(0, delay);
-
-            return true;
-        }
-
-        return true;
+        return checkOther(action, keyCode);
     }
 
     /**
@@ -102,31 +89,31 @@ class KeyToucher extends Toucher {
             //mMouse.toast("onKey : " + keyCode);
 
             //左上 + 声量减键 = home键
-            if (mMouseSprite.getParams().y <= 0 && mMouseSprite.getParams().x <= 0) {
+            if (mMouseSprite.getRawY() <= 0 && mMouseSprite.getRawX() <= 0) {
                 ShellCmdUtil.execShellCmdKeyEvent(KeyEvent.KEYCODE_HOME);
                 return true;
             }
 
             //最左 + 声量减键 = 滑出左边内容
-            if (mMouseSprite.getParams().x <= 0) {
+            if (mMouseSprite.getRawX() <= 0) {
                 ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_LEFT, mMouseSprite.getX(), mMouseSprite.getY());
                 return true;
             }
 
             //最上 + 声量减键 = 屏幕向下滚动
-            if (mMouseSprite.getParams().y <= 0) {
+            if (mMouseSprite.getRawY() <= 0) {
                 ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_TOP, mMouseSprite.getX(), mMouseSprite.getY());
                 return true;
             }
 
             //最右 + 声量减键 = 滑出右边内容
-            if (mMouseSprite.getParams().x >= ToucherService.screenW) {
+            if (mMouseSprite.getRawX() >= ToucherService.screenWidth) {
                 ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_RIGHT, mMouseSprite.getX(), mMouseSprite.getY());
                 return true;
             }
 
             //最下 + 声量减键 = 屏幕向上滚动
-            if (mMouseSprite.getParams().y >= ToucherService.screenH) {
+            if (mMouseSprite.getRawY() >= ToucherService.screenHeight) {
                 ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_TO_BOTTOM, mMouseSprite.getX(), mMouseSprite.getY());
                 return true;
             }
@@ -150,21 +137,36 @@ class KeyToucher extends Toucher {
             //mMouse.toast("onKey : " + keyCode);
 
             // 最上 + 声量键加 = 滑出状态栏
-            if (mMouseSprite.getParams().y <= 0) {
+            if (mMouseSprite.getRawY() <= 0) {
                 ShellCmdUtil.execShellCmdSwipe(ShellCmdUtil.SWIPE_STATUS_BAR, mMouseSprite.getX(), mMouseSprite.getRawY());
                 return true;
             }
 
+            //没有触屏和焦点能力
             mMouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
             ShellCmdUtil.execShellCmdTap(mMouseSprite.getX(), mMouseSprite.getY());
 
+            //没有触屏能力
             mMouseSprite.sendMessage(0, delay);
 
             return true;
         }
 
         return false;
+    }
+
+    private boolean checkOther(int action, int keyCode) {
+        if (action == KeyEvent.ACTION_UP) {
+            mMouseSprite.toast("onKey : " + keyCode);
+
+            mMouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+
+            ShellCmdUtil.execShellCmdKeyEvent(keyCode);
+
+            mMouseSprite.sendMessage(0, delay);
+        }
+        return true;
     }
 }

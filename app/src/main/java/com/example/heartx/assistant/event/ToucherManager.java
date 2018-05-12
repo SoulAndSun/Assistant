@@ -16,6 +16,8 @@ public class ToucherManager {
 
     public static final int STANDARD_TOUCHER_ID = 1;
 
+    public static final int INDUCE_TOUCHER_ID = 2;
+
     //当前模拟事件的模式
     private int currentToucher = STANDARD_TOUCHER_ID;
 
@@ -50,30 +52,6 @@ public class ToucherManager {
     /**
      *
      * @param type 代表不同类型的模式
-     * @return
-     */
-    public Toucher getToucher(int type) {
-
-        switch (type) {
-            case SELECTOR_TOUCHER_ID:
-                if (!(mToucher instanceof SelectorToucher)) {
-                    //mToucher = new SelectorToucher();
-                }
-                break;
-
-            case STANDARD_TOUCHER_ID:
-                if (!(mToucher instanceof KeyToucher)) {
-                    //mToucher = new KeyToucher();
-                }
-                break;
-        }
-
-        return mToucher;
-    }
-
-    /**
-     *
-     * @param type 代表不同类型的模式
      * @param mouseSprite 用传感器控制的鼠标
      * @return
      */
@@ -81,15 +59,15 @@ public class ToucherManager {
 
         switch (type) {
             case SELECTOR_TOUCHER_ID:
-                if (!(mToucher instanceof SelectorToucher)) {
-                    mToucher = new SelectorToucher(mouseSprite);
-                }
+                mToucher = new SelectorToucher(mouseSprite);
                 break;
 
             case STANDARD_TOUCHER_ID:
-                if (!(mToucher instanceof KeyToucher)) {
-                    mToucher = new KeyToucher(mouseSprite);
-                }
+                mToucher = new KeyToucher(mouseSprite);
+                break;
+
+            case INDUCE_TOUCHER_ID:
+                mToucher = new InduceToucher(mouseSprite);
                 break;
         }
 

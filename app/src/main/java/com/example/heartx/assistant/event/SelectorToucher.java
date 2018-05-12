@@ -20,14 +20,25 @@ class SelectorToucher extends Toucher {
     private Location rightTop;
     private Location leftBottom;
     private Location rightBottom;
+    private final MouseSprite.Mouse mMouse;
 
     SelectorToucher(MouseSprite mouseSprite) {
         super(mouseSprite);
+
         leftTop = new Location(ToucherManager.STANDARD_TOUCHER_ID, 0, 0);
-        rightTop = new Location(NULL, ToucherService.screenW, 0);
-        leftBottom = new Location(NULL, 0, ToucherService.screenH);
-        rightBottom = new Location(NULL, ToucherService.screenW, ToucherService.screenH);
-        mMouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, 0.5f);
+        rightTop = new Location(ToucherManager.INDUCE_TOUCHER_ID, ToucherService.screenWidth, 0);
+        leftBottom = new Location(NULL, 0, ToucherService.screenHeight);
+        rightBottom = new Location(NULL, ToucherService.screenWidth, ToucherService.screenHeight);
+
+        WindowManager.LayoutParams params = mouseSprite.generateParam(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        mMouse = new MouseSprite.Mouse(mouseSprite.getContext());
+        mouseSprite.addWindowView(mMouse, params);
+    }
+
+    @Override
+    public void changeMouseState(MouseSprite mouseSprite) {
+        mouseSprite.changeMouseState(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, 0.5f);
     }
 
     @Override
@@ -53,13 +64,13 @@ class SelectorToucher extends Toucher {
     /**
      * 鼠标在指定的posX和posY的位置上停留{@link #timeEnd}毫秒后，将转换到指定模式
      *
-     * @param posX   指定的x
-     * @param posY   指定的y
+     * @param posX     指定的x
+     * @param posY     指定的y
      * @param targetID
      * @return 如果检查的位置是正确的，返回true打断其他位置的检查，否则返回false
      */
     private boolean checkOn(int targetID, int posX, int posY) {
-        if (mMouseSprite.getParams().x == posX && mMouseSprite.getParams().y == posY) {
+        if (mMouseSprite.getRawX() == posX && mMouseSprite.getRawY() == posY) {
 
             if (isStartTime) {
                 mTimeMillis = System.currentTimeMillis();
@@ -68,8 +79,9 @@ class SelectorToucher extends Toucher {
 
             if ((System.currentTimeMillis() - mTimeMillis) > timeEnd) {
 
-                if (targetID != -1) {
+                if (targetID != NULL) {
                     mMouseSprite.toast("转换成功,ToucherID：" + targetID);
+                    mMouseSprite.removeWindowView(mMouse);
                     change(targetID);
                 } else {
                     mMouseSprite.toast("转换失败,ToucherID：" + targetID);

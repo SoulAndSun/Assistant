@@ -17,13 +17,20 @@ import com.example.heartx.assistant.ToucherService;
 public abstract class Toucher implements SensorEventListener, View.OnKeyListener {
 
     MouseSprite mMouseSprite;
-    boolean isStartTime = false;
+    boolean isStartTime = true;
     long mTimeMillis = System.currentTimeMillis() * 2;
     long timeEnd = 5000;
 
+    private Toucher() {
+    }
+
     Toucher(MouseSprite mouseSprite) {
         mMouseSprite = mouseSprite;
+
+        changeMouseState(mouseSprite);
     }
+
+    public abstract void changeMouseState(MouseSprite mouseSprite);
 
     public SensorEventListener getSensorListener() {
         return this;
@@ -54,7 +61,7 @@ public abstract class Toucher implements SensorEventListener, View.OnKeyListener
 
     void checkToucherChange() {
 
-        if (mMouseSprite.getParams().x == ToucherService.screenW && mMouseSprite.getParams().y == 0) {
+        if (mMouseSprite.getRawX() == ToucherService.screenWidth && mMouseSprite.getRawY() == 0) {
 
             if (isStartTime) {
                 mTimeMillis = System.currentTimeMillis();
@@ -71,7 +78,7 @@ public abstract class Toucher implements SensorEventListener, View.OnKeyListener
         isStartTime = true;
     }
 
-    void move(SensorEvent event) {
+    private void move(SensorEvent event) {
         mMouseSprite.getParams().x += event.values[0] * -1;
 
         if ((event.values[1] - 6) > 0) {
@@ -80,8 +87,8 @@ public abstract class Toucher implements SensorEventListener, View.OnKeyListener
             mMouseSprite.getParams().y += event.values[1] - 6;
         }
 
-        mMouseSprite.getParams().x = MathUtils.clamp(mMouseSprite.getParams().x, 0, ToucherService.screenW);
-        mMouseSprite.getParams().y = MathUtils.clamp(mMouseSprite.getParams().y, 0, ToucherService.screenH);
+        mMouseSprite.getParams().x = MathUtils.clamp(mMouseSprite.getRawX(), 0, ToucherService.screenWidth);
+        mMouseSprite.getParams().y = MathUtils.clamp(mMouseSprite.getRawY(), 0, ToucherService.screenHeight);
 
         if (mMouseSprite.getWindowManager() != null) {
             mMouseSprite.getWindowManager().updateViewLayout(mMouseSprite.getMouse(), mMouseSprite.getParams());

@@ -22,8 +22,8 @@ public class ShellCmdUtil {
     public static final int SWIPE_STATUS_BAR = 5;
     public static final int LONG_CLICK = 6;
 
-    private static int delay = 500;
-    private static int offset = 200;
+    private static int delay = 1000;
+    private static int offset = 300;
 
     public static void execShellCmdTap(View view) {
         int[] location = new int[2];
@@ -36,7 +36,6 @@ public class ShellCmdUtil {
     }
 
     public static void execShellCmdTap(int x, int y) {
-        Logger.d(x +"------------------"+ y);
         execShellCmd("input tap " + x + " " + y);
     }
 
@@ -77,7 +76,7 @@ public class ShellCmdUtil {
 
         switch (num) {
             case SWIPE_TO_TOP:
-                execShellCmd("input swipe " + x + " " + (y + offset) + " " + x + " " + ToucherService.screenH + " " + delay);
+                execShellCmd("input swipe " + x + " " + (y + offset) + " " + x + " " + ToucherService.screenHeight + " " + delay);
                 break;
             case SWIPE_TO_BOTTOM:
                 execShellCmd("input swipe " + x + " " + (y - offset) + " " + x + " 000 " + delay);
@@ -86,11 +85,11 @@ public class ShellCmdUtil {
                 execShellCmd("input swipe " + (x - offset) + " " + y + " 000 " + y + " " + delay);
                 break;
             case SWIPE_TO_LEFT:
-                execShellCmd("input swipe " + (x + offset) + " " + y + " " + ToucherService.screenW + " " + y + " " + delay);
+                execShellCmd("input swipe " + (x + offset) + " " + y + " " + ToucherService.screenWidth + " " + y + " " + delay);
                 break;
 
             case SWIPE_STATUS_BAR:
-                execShellCmd("input swipe " + x + " " + y + " " + x + " " + ToucherService.screenH + " " + delay);
+                execShellCmd("input swipe " + x + " " + y + " " + x + " " + ToucherService.screenHeight + " " + delay);
                 break;
 
             case LONG_CLICK:

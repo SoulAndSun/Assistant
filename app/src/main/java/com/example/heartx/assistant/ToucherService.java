@@ -27,8 +27,8 @@ import io.reactivex.functions.Consumer;
 
 public class ToucherService extends Service {
 
-    public static int screenW;
-    public static int screenH;
+    public static int screenWidth;
+    public static int screenHeight;
 
     private SensorManager mSensorManager;
     private Sensor mSensor;
@@ -70,8 +70,8 @@ public class ToucherService extends Service {
         super.onCreate();
         //Toast.makeText(this, "onCreate", Toast.LENGTH_LONG).show();
 
-        screenW = getResources().getDisplayMetrics().widthPixels;
-        screenH = getResources().getDisplayMetrics().heightPixels;
+        screenWidth = getResources().getDisplayMetrics().widthPixels;
+        screenHeight = getResources().getDisplayMetrics().heightPixels;
 
         mMouseSprite = new MouseSprite(this);
 
